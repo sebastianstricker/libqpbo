@@ -31,12 +31,12 @@ template <typename REAL>
 	QPBO<REAL>::QPBO(int node_num_max, int edge_num_max, void (*err_function)(const char *))
 	: node_num(0),
 	  nodeptr_block(NULL),
+	  error_function(err_function),
+	  zero_energy(0),
 	  changed_list(NULL),
-	  fix_node_info_list(NULL),
 	  stage(0),
 	  all_edges_submodular(true),
-	  error_function(err_function),
-	  zero_energy(0)
+	  fix_node_info_list(NULL)
 {
 	node_num_max += 4;
 	if (node_num_max < 16) node_num_max = 16;
@@ -82,12 +82,12 @@ template <typename REAL>
 	QPBO<REAL>::QPBO(QPBO<REAL>& q)
 	: node_num(q.node_num),
 	  nodeptr_block(NULL),
+	  error_function(q.error_function),
+	  zero_energy(q.zero_energy),
 	  changed_list(NULL),
-	  fix_node_info_list(NULL),
 	  stage(q.stage),
 	  all_edges_submodular(q.all_edges_submodular),
-	  error_function(q.error_function),
-	  zero_energy(q.zero_energy)
+	  fix_node_info_list(NULL)
 {
 	int node_num_max = q.node_shift/sizeof(Node);
 	int arc_num_max = (int)(q.arc_max[0] - q.arcs[0]);
@@ -194,6 +194,15 @@ template <typename REAL>
 	code_assert(node_num_max_new > node_shift/((int)sizeof(Node)));
 	Node* nodes_old[2] = { nodes[0], nodes[1] };
 
+    // After realloc, nodes_old may be undefined
+    // I am unsure of intent here, so i just calc the distance here.
+    auto memmove_dist = ((char*)nodes_old[1] - (char*)nodes_old[0]);
+    //
+    // Replaces below:
+    // memmove(nodes[1], (char*)nodes[0] + ((char*)nodes_old[1] - (char*)nodes_old[0]), node_num*sizeof(Node));
+    // With:
+    // memmove(nodes[1], (char*)nodes[0] + memmove_dist, node_num*sizeof(Node));
+
 	int node_num_max = node_num_max_new;
 	nodes[0] = (Node*) realloc(nodes_old[0], 2*node_num_max*sizeof(Node));
 	if (!nodes[0]) { if (error_function) (*error_function)("Not enough memory!"); exit(1); }
@@ -205,7 +214,7 @@ template <typename REAL>
 	node_max[1] = nodes[1] + node_num_max;
 	if (stage)
 	{
-		memmove(nodes[1], (char*)nodes[0] + ((char*)nodes_old[1] - (char*)nodes_old[0]), node_num*sizeof(Node));
+		memmove(nodes[1], (char*)nodes[0] + memmove_dist, node_num*sizeof(Node));
 	}
 
 	Arc* a;
@@ -485,7 +494,7 @@ template <typename REAL>
 }
 
 template <typename REAL>
-	void QPBO<REAL>::AddPairwiseTerm(EdgeId e, NodeId _i, NodeId _j, REAL E00, REAL E01, REAL E10, REAL E11)
+	void QPBO<REAL>::AddPairwiseTerm(EdgeId e, NodeId _i, [[maybe_unused]] NodeId _j, REAL E00, REAL E01, REAL E10, REAL E11)
 {
 	user_assert(e >= 0 && arcs[0][2*e].sister);
 	user_assert(arcs[0][2*e].head==&nodes[0][_i] || arcs[0][2*e].head==&nodes[1][_i] || arcs[0][2*e].head==&nodes[0][_j] || arcs[0][2*e].head==&nodes[1][_j]);

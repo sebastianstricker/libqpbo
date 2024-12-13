@@ -473,18 +473,18 @@ template <typename REAL>
 }
 
 template <typename REAL>
-	inline bool QPBO<REAL>::AddDirectedConstraint1(Arc* a, int xi, int xj)
+	inline bool QPBO<REAL>::AddDirectedConstraint1(Arc* a, int xi, [[maybe_unused]] int xj)
 {
 	Node* j = a->head;
 	Node* _j[2];
 	Arc* _a[2] = { a, GetMate(a) };
-	int x; // 0 if current edge is submodular, 1 otherwise
+	[[maybe_unused]] int x; // used in assert. 0 if current edge is submodular, 1 otherwise
 
 	_j[0] = j;
 	if (IsNode0(j)) { _j[1] = GetMate0(j); x = 0; }
 	else            { _j[1] = GetMate1(j); x = 1; }
 
-	code_assert((xi + xj + x)%2 == 0);
+	code_assert((xi + xj + x)%2 == 0); // <--- x used in assert here
 
 	if (xi == 0)
 	{

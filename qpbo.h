@@ -38,7 +38,7 @@
 
 		P. L. Hammer, P. Hansen, and B. Simeone.
 		Roof duality, complementation and persistency in quadratic 0-1 optimization.
-		Mathematical Programming, 28:121–155, 1984.
+		Mathematical Programming, 28:121ï¿½155, 1984.
 
 		E. Boros, P. L. Hammer, and X. Sun.
 		Network flows and minimization of quadratic pseudo-Boolean functions.
@@ -262,7 +262,7 @@ public:
 	//
 	//         A. Billionnet and B. Jaumard.
 	//         A decomposition method for minimizing quadratic pseudoboolean functions.
-	//         Operation Research Letters, 8:161–163, 1989.	
+	//         Operation Research Letters, 8:161-163, 1989.	
 	//
 	//     For a review see also
 	//
@@ -424,6 +424,20 @@ private:
 
 		unsigned int user_label : 1; // set by calling SetLabel()
 
+        /**
+         * DISABLE WARNING FOR anonymous union with anonymous structs BELOW.
+         * Not naming the union is non-standard, however, i do see the use here.
+         * Do not want to meddle with rest of the code too much, so I disable the warning here. Sebastian Stricker
+         * 
+         */
+        #if defined(_MSC_VER)
+            // Microsoft Visual C++
+            #pragma warning(disable : 4201)  // nonstandard extension used: nameless struct/union
+        #elif defined(__GNUC__) || defined(__clang__)
+            // GCC and Clang
+            #pragma GCC diagnostic ignored "-Wpedantic"
+        #endif
+
 		union
 		{
 			struct
@@ -440,6 +454,12 @@ private:
 				Arc		*dfs_current;
 			};
 		};
+
+        #if defined(_MSC_VER)
+            #pragma warning(default : 4201)
+        #elif defined(__GNUC__) || defined(__clang__)
+            #pragma GCC diagnostic warning "-Wpedantic"
+        #endif
 
 		REAL		tr_cap;		// if tr_cap > 0 then tr_cap is residual capacity of the Arc SOURCE->Node
 								// otherwise         -tr_cap is residual capacity of the Arc Node->SINK

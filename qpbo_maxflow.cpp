@@ -389,7 +389,7 @@ template <typename REAL>
 		}
 	}
 
-	if (i->parent = a0_min)
+	if ((i->parent = a0_min))
 	{
 		i -> TS = TIME;
 		i -> DIST = d_min + 1;
@@ -466,7 +466,7 @@ template <typename REAL>
 		}
 	}
 
-	if (i->parent = a0_min)
+	if ((i->parent = a0_min))
 	{
 		i -> TS = TIME;
 		i -> DIST = d_min + 1;
@@ -645,7 +645,7 @@ template <typename REAL>
 	Node *i;
 	Arc *a;
 	int r;
-	int num1 = 0, num2 = 0;
+	[[maybe_unused]] int num1 = 0, num2 = 0;
 
 	// test whether all nodes i with i->next!=NULL are indeed in the queue
 	for (i=nodes[0]; i<node_last[stage]; i++)
